@@ -1,86 +1,136 @@
+const BASE_URL = "https://valorisation.humanum-p8.fr/api/items";
+
+// Si besoin :
+const KEY_IDENTITY = "YOUR_IDENTITY";
+const KEY_CREDENTIAL = "YOUR_CREDENTIAL";
+
 let items = [];
+let currentItem = null;
 let currentIndex = 0;
-let evaluations = [];
 
-const apiUrlInput = document.getElementById('apiUrl');
-const propertyInput = document.getElementById('propertyInput');
+let evaluations = JSON.parse(localStorage.getItem("evaluations") || "[]");
 
-const loadBtn = document.getElementById('loadBtn');
-const nextBtn = document.getElementById('nextBtn');
-const exportBtn = document.getElementById('exportBtn');
+const loadBtn = document.getElementById("loadBtn");
+const itemList = document.getElementById("itemList");
+const propertiesDiv = document.getElementById("properties");
+const titleEl = document.getElementById("title");
+const progress = document.getElementById("progress");
 
-const itemSection = document.getElementById('itemSection');
-const evaluationSection = document.getElementById('evaluationSection');
+const step2 = document.getElementById("step2");
+const step3 = document.getElementById("step3");
 
-const titleEl = document.getElementById('title');
-const propertyEl = document.getElementById('property');
-const slider = document.getElementById('slider');
-const scoreEl = document.getElementById('score');
+const saveBtn = document.getElementById("saveBtn");
+const exportBtn = document.getElementById("exportBtn");
+const backBtn = document.getElementById("backBtn");
 
-slider.addEventListener('input', () => {
-  scoreEl.innerText = slider.value;
-});
+loadBtn.onclick = async () => {
+  try {
 
-loadBtn.addEventListener('click', async () => {
-  const url = apiUrlInput.value;
-  const res = await fetch(url);
-  items = await res.json();
-  currentIndex = 0;
-  evaluations = JSON.parse(localStorage.getItem('evaluations') || '[]');
-  showItem();
-});
+    // let url = `${BASE_URL}?item_set_id=30437`;
+    let url = `https://cors-anywhere.herokuapp.com/${BASE_URL}?item_set_id=30437`;
 
-function getProperty(item, prop) {
-  if (!item[prop]) return 'Non disponible';
-  return item[prop][0]['@value'] || JSON.stringify(item[prop]);
-}
+    // décommente si API protégée
+    // url += `&key_identity=${KEY_IDENTITY}&key_credential=${KEY_CREDENTIAL}`;
 
-function showItem() {
-  if (currentIndex >= items.length) {
-    alert('Terminé !');
-    return;
+    const res = await fetch(url);
+    items = await res.json();
+
+    displayItems();
+    step2.classList.remove("hidden");
+
+  } catch (e) {
+    alert("Erreur API (probablement CORS)");
+    console.error(e);
   }
+};
 
-  const item = items[currentIndex];
-  const prop = propertyInput.value;
+function displayItems() {
+  itemList.innerHTML = "";
 
-  titleEl.innerText = item['o:title'] || 'Sans titre';
-  propertyEl.innerText = getProperty(item, prop);
-
-  itemSection.classList.remove('hidden');
-  evaluationSection.classList.remove('hidden');
-
-  slider.value = 50;
-  scoreEl.innerText = 50;
+  items.forEach((item, index) => {
+    const div = document.createElement("div");
+    div.className = "item";
+    div.innerText = item["o:title"] || "Sans titre";
+    div.onclick = () => selectItem(index);
+    itemList.appendChild(div);
+  });
 }
 
-nextBtn.addEventListener('click', () => {
-  const item = items[currentIndex];
+function selectItem(index) {
+  currentIndex = index;
+  currentItem = items[index];
 
-  evaluations.push({
-    id: item['o:id'],
-    title: item['o:title'],
-    property: propertyInput.value,
-    score: slider.value
+  titleEl.innerText = currentItem["o:title"];
+  renderProperties();
+
+  progress.innerText = `Item ${index + 1} / ${items.length}`;
+  step3.classList.remove("hidden");
+}
+
+function renderProperties() {
+  propertiesDiv.innerHTML = "";
+
+  Object.entries(currentItem).forEach(([key, values]) => {
+    if (!key.includes(":") || !Array.isArray(values)) return;
+
+    values.forEach(v => {
+      if (!v["@value"]) return;
+
+      const wrap = document.createElement("div");
+      wrap.className = "property";
+
+      const label = document.createElement("label");
+      label.innerText = `${key} : ${v["@value"]}`;
+
+      const slider = document.createElement("input");
+      slider.type = "range";
+      slider.min = 0;
+      slider.max = 100;
+      slider.value = 50;
+
+      wrap.appendChild(label);
+      wrap.appendChild(slider);
+      propertiesDiv.appendChild(wrap);
+    });
+  });
+}
+
+saveBtn.onclick = () => {
+  const props = propertiesDiv.querySelectorAll(".property");
+
+  const itemEvaluation = {
+    item_id: currentItem["o:id"],
+    title: currentItem["o:title"],
+    annotations: []
+  };
+
+  props.forEach(p => {
+    const label = p.querySelector("label").innerText;
+    const score = p.querySelector("input").value;
+
+    itemEvaluation.annotations.push({
+      property: label,
+      score: score
+    });
   });
 
-  localStorage.setItem('evaluations', JSON.stringify(evaluations));
+  evaluations.push(itemEvaluation);
+  localStorage.setItem("evaluations", JSON.stringify(evaluations));
 
-  currentIndex++;
-  showItem();
-});
+  alert("Enregistré !");
+};
 
-exportBtn.addEventListener('click', () => {
-  let csv = 'id,title,property,score\n';
-  evaluations.forEach(e => {
-    csv += `${e.id},"${e.title}",${e.property},${e.score}\n`;
+backBtn.onclick = () => {
+  step3.classList.add("hidden");
+};
+
+exportBtn.onclick = () => {
+  const blob = new Blob([JSON.stringify(evaluations, null, 2)], {
+    type: "application/json"
   });
 
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const url = URL.createObjectURL(blob);
-
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'evaluations.csv';
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "annotations.json";
   a.click();
-});
+};

@@ -1,48 +1,66 @@
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
-  background: #f0f2f5;
+  font-family: Arial;
+  background: #eef1f5;
 }
 
 .app {
-  max-width: 600px;
+  max-width: 650px;
   margin: auto;
   padding: 15px;
-}
-
-header {
-  text-align: center;
-  margin-bottom: 10px;
 }
 
 .card {
   background: white;
   padding: 15px;
-  margin-bottom: 15px;
   border-radius: 15px;
+  margin-bottom: 15px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  overflow: hidden;
 }
 
-input, button {
+button {
   width: 100%;
   padding: 10px;
   margin-top: 10px;
   border-radius: 10px;
-  border: 1px solid #ccc;
-}
-
-button {
+  border: none;
   background: black;
   color: white;
-  border: none;
+  cursor: pointer;
 }
 
 .hidden {
   display: none;
 }
 
-#score {
+.item {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  word-break: break-word;
+}
+
+.item:hover {
+  background: #f5f5f5;
+}
+
+.property {
+  margin-bottom: 15px;
+}
+
+.property label {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 5px;
+  word-break: break-word;
+}
+
+.property input {
+  width: 100%;
+}
+
+#progress {
+  font-size: 12px;
   text-align: center;
-  font-size: 20px;
-  font-weight: bold;
 }

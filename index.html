@@ -3,38 +3,39 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Omeka Evaluator V2</title>
+  <title>Omeka Annotation Tool</title>
   <link rel="stylesheet" href="styles.css">
 </head>
-
 <body>
-  <div class="app">
-    <header>
-      <h1>Omeka Evaluator</h1>
-    </header>
 
-    <section class="config card">
-      <input id="apiUrl" placeholder="URL API Omeka (ex: /api/items)">
-      <input id="propertyInput" placeholder="Propriété (ex: dcterms:description)">
-      <button id="loadBtn">Charger</button>
-    </section>
+<div class="app">
+  <header>
+    <h1>Annotation Omeka</h1>
+    <div id="progress"></div>
+  </header>
 
-    <section id="itemSection" class="card hidden">
-      <h2 id="title"></h2>
-      <p id="property"></p>
-    </section>
+  <section id="step1" class="card">
+    <h2>Chargement</h2>
+    <button id="loadBtn">Charger les items</button>
+  </section>
 
-    <section id="evaluationSection" class="card hidden">
-      <input type="range" id="slider" min="0" max="100" value="50">
-      <div id="score">50</div>
-      <button id="nextBtn">Valider & Suivant</button>
-    </section>
+  <section id="step2" class="card hidden">
+    <h2>Choisir un item</h2>
+    <div id="itemList"></div>
+  </section>
 
-    <section class="card">
-      <button id="exportBtn">Exporter CSV</button>
-    </section>
-  </div>
+  <section id="step3" class="card hidden">
+    <button id="backBtn">⬅ Retour</button>
+    <h3 id="title"></h3>
+    <div id="properties"></div>
+    <button id="saveBtn">Enregistrer</button>
+  </section>
 
-  <script src="app.js"></script>
+  <section class="card">
+    <button id="exportBtn">Exporter JSON</button>
+  </section>
+</div>
+
+<script src="app.js"></script>
 </body>
 </html>
