@@ -1,16 +1,11 @@
 const BASE_URL = "https://valorisation.humanum-p8.fr/api/items";
 
-// Si besoin :
-const KEY_IDENTITY = "YOUR_IDENTITY";
-const KEY_CREDENTIAL = "YOUR_CREDENTIAL";
-
 let items = [];
 let currentItem = null;
 let currentIndex = 0;
 
 let evaluations = JSON.parse(localStorage.getItem("evaluations") || "[]");
 
-const loadBtn = document.getElementById("loadBtn");
 const itemList = document.getElementById("itemList");
 const propertiesDiv = document.getElementById("properties");
 const titleEl = document.getElementById("title");
@@ -23,14 +18,14 @@ const saveBtn = document.getElementById("saveBtn");
 const exportBtn = document.getElementById("exportBtn");
 const backBtn = document.getElementById("backBtn");
 
-loadBtn.onclick = async () => {
+// 🔥 Chargement automatique
+window.onload = loadItems;
+
+async function loadItems() {
   try {
+    const target = BASE_URL + '?item_set_id=30437';
 
-    // let url = `${BASE_URL}?item_set_id=30437`;
-    let url = `https://cors-anywhere.herokuapp.com/${BASE_URL}?item_set_id=30437`;
-
-    // décommente si API protégée
-    // url += `&key_identity=${KEY_IDENTITY}&key_credential=${KEY_CREDENTIAL}`;
+    const url = `https://api.allorigins.win/raw?url=${encodeURIComponent(target)}`;
 
     const res = await fetch(url);
     items = await res.json();
@@ -39,10 +34,10 @@ loadBtn.onclick = async () => {
     step2.classList.remove("hidden");
 
   } catch (e) {
-    alert("Erreur API (probablement CORS)");
+    alert("Erreur API persistante");
     console.error(e);
   }
-};
+}
 
 function displayItems() {
   itemList.innerHTML = "";
