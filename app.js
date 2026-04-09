@@ -27,18 +27,27 @@ async function loadItems() {
   try {
     const target = BASE_URL + "?item_set_id=30437";
 
-    // ✅ Proxy pour contourner CORS
-    const url = `https://api.allorigins.win/raw?url=${encodeURIComponent(target)}`;
+    // ✅ proxy qui fonctionne
+    const url = `https://corsproxy.io/?${encodeURIComponent(target)}`;
 
     const res = await fetch(url);
+
+    if (!res.ok) {
+      throw new Error("Réponse réseau invalide");
+    }
+
     items = await res.json();
+
+    if (!Array.isArray(items)) {
+      throw new Error("Réponse API inattendue");
+    }
 
     displayItems();
     step2.classList.remove("hidden");
 
   } catch (e) {
-    alert("Erreur API (CORS toujours bloqué)");
-    console.error(e);
+    alert("Erreur API (CORS / proxy)");
+    console.error("DEBUG:", e);
   }
 }
 
