@@ -18,13 +18,16 @@ const saveBtn = document.getElementById("saveBtn");
 const exportBtn = document.getElementById("exportBtn");
 const backBtn = document.getElementById("backBtn");
 
-// 🔥 Chargement automatique
+
+// 🔥 Chargement automatique au démarrage
 window.onload = loadItems;
+
 
 async function loadItems() {
   try {
-    const target = BASE_URL + '?item_set_id=30437';
+    const target = BASE_URL + "?item_set_id=30437";
 
+    // ✅ Proxy pour contourner CORS
     const url = `https://api.allorigins.win/raw?url=${encodeURIComponent(target)}`;
 
     const res = await fetch(url);
@@ -34,10 +37,11 @@ async function loadItems() {
     step2.classList.remove("hidden");
 
   } catch (e) {
-    alert("Erreur API persistante");
+    alert("Erreur API (CORS toujours bloqué)");
     console.error(e);
   }
 }
+
 
 function displayItems() {
   itemList.innerHTML = "";
@@ -51,16 +55,19 @@ function displayItems() {
   });
 }
 
+
 function selectItem(index) {
   currentIndex = index;
   currentItem = items[index];
 
-  titleEl.innerText = currentItem["o:title"];
+  titleEl.innerText = currentItem["o:title"] || "Sans titre";
+
   renderProperties();
 
   progress.innerText = `Item ${index + 1} / ${items.length}`;
   step3.classList.remove("hidden");
 }
+
 
 function renderProperties() {
   propertiesDiv.innerHTML = "";
@@ -90,6 +97,7 @@ function renderProperties() {
   });
 }
 
+
 saveBtn.onclick = () => {
   const props = propertiesDiv.querySelectorAll(".property");
 
@@ -112,17 +120,20 @@ saveBtn.onclick = () => {
   evaluations.push(itemEvaluation);
   localStorage.setItem("evaluations", JSON.stringify(evaluations));
 
-  alert("Enregistré !");
+  alert("Annotation enregistrée !");
 };
+
 
 backBtn.onclick = () => {
   step3.classList.add("hidden");
 };
 
+
 exportBtn.onclick = () => {
-  const blob = new Blob([JSON.stringify(evaluations, null, 2)], {
-    type: "application/json"
-  });
+  const blob = new Blob(
+    [JSON.stringify(evaluations, null, 2)],
+    { type: "application/json" }
+  );
 
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
